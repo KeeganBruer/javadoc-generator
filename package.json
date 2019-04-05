@@ -3,7 +3,7 @@
 	"displayName": "Javadoc-Generator",
 	"description": "A Javadoc Generator for VSCode.",
 	"publisher": "KeeganBruer",
-	"version": "1.0.6",
+	"version": "1.2.1",
 	"icon": "JavaGeneratorLogo.PNG",
 	"engines": {
 		"vscode": "^1.32.0"
@@ -12,14 +12,19 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.generateDoc"
+		"onCommand:extension.generateDoc",
+		"onCommand:extension.generateStandAloneDoc"
 	],
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [
 			{
 				"command": "extension.generateDoc",
-				"title": "Javadoc Generator: Generate Doc"
+				"title": "Javadoc Generator: System Generator"
+			},
+			{
+				"command": "extension.generateStandAloneDoc",
+				"title": "Javadoc Generator: Built In Generator"
 			}
 		]
 	},
@@ -28,11 +33,11 @@
 		"test": "node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
-		"typescript": "^3.3.1",
-		"vscode": "^1.1.28",
-		"eslint": "^5.13.0",
+		"@types/mocha": "^2.2.42",
 		"@types/node": "^10.12.21",
-		"@types/mocha": "^2.2.42"
+		"eslint": "^5.13.0",
+		"typescript": "^3.3.1",
+		"vscode": "^1.1.33"
 	},
 	"repository": {
 		"type": "git",
