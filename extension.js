@@ -21,7 +21,16 @@ function activate(context) {
 		for (let i = 0; i < dir.length; i++) {
 			dir[i] = dir[i].split("\\")[dir[i].split("\\").length-1]
 		}
-		terminal.sendText("\"" +location + "\""+"/bin/javadoc.exe -d " + filePath + "\\javadoc -sourcepath " + filePath + "\\src -subpackages " + dir.join(", "));
+		let exe_location = "javadoc.exe"
+		let trimmed_loc = location.trim();
+		let loc_array = trimmed_loc.split("");
+		if (trimmed_loc.split("/")[trimmed_loc.split("/").length-1] != "bin") {
+			exe_location = "bin/"+exe_location;
+		}
+		if (loc_array[loc_array.length-1] != "/") {
+			exe_location = "/"+exe_location;
+		}
+		terminal.sendText("\""+location+exe_location+"\" -d \"" + filePath + "\\javadoc\" -sourcepath \"" + filePath + "\" -subpackages " + dir.join(", "));
 		terminal.show();
 	}
 	const isDirectory = source => lstatSync(source).isDirectory();
@@ -30,17 +39,17 @@ function activate(context) {
 		// The code you place here will be executed every time your command is executed
 		vscode.window.showInformationMessage('Using JAVA_HOME to find java JDK');
 
-		let location = process.env.JAVA_HOME;
+		let location;// = process.env.JAVA_HOME;
 		
 		if (!location) {
 			vscode.window.showInformationMessage("No JAVA_HOME was found in the path.")
 			location = await vscode.window.showInputBox({
-				prompt:"Enter Location of the JDK or enter \'built in\' to use the one packaged with this project."
+				prompt:"Enter Location of the JDK or leave blank to use the one packaged with this project."
 			})
 			
 		}
-		if (location.toLowerCase() == "built in") {
-			location = __dirname + "\\dependencies\\jdk\\bin";
+		if (!location || location.toLowerCase().trim() == "") {
+			location = __dirname + "/dependencies/jdk/bin";
 		}
 		var filePath = await vscode.window.showInputBox({
 			prompt:"Enter the path to the folder you wish to compile the javadoc for. "+
