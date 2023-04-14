@@ -18,6 +18,11 @@ The user will then be prompted for the source directory in which your java packa
 If you find issues, and you probably will, you can report them [here](https://github.com/KeeganBruer/javadoc-generator/issues).
 
 ## Release Notes
+### 2.1.0
+- Normalizes the location of the java project. 
+- Removes node_modules from the bundling and download.
+
+
 ### 2.0.0
 - New Release Stage with updated response messages and more customizability. 
 - Removed Javadoc Generator: System Generator and Javadoc Generator: Built In Generator
