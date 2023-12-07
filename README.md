@@ -5,6 +5,10 @@
 Javadoc Generator is an extension to VSCode that wraps the commandline javadoc compiler. To use just open
 any .java file and run the generator. The generator will then scan the rest of the project and generate a javadoc for the project.
 
+## Disclaimer
+This project is not actively maintained anymore. I plan to rebuild in 2024, so stay tuned if your interested in a complete overhaul to the extension. Get excited for Version 3!
+
+
 ## Usage
 The simplest way to generate a Javadoc for your project is to JDK that comes with Javadoc-Generator. You can preform this command
 by <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and then selecting "Javadoc Generator: Generate Javadoc".
