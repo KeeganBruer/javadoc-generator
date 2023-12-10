@@ -17,6 +17,14 @@ If you find issues, and you probably will, you can report them [here](https://gi
 Please include the config.jdgenerator file with your issue report.
 
 ## Release Notes
+
+### 3.0.0
+- Complete rebuild
+- Adds config.jdgenerator for better transparency
+- Config validation and error reporting
+- Shows the generated Javadoc command in the config.jdgenerator
+- Appends Javadoc output to config file for easy submission to [GitHub Issues](https://github.com/KeeganBruer/javadoc-generator/issues)
+
 ### 2.1.0
 - Normalizes the location of the java project. 
 - Removes node_modules from the bundling and download.
