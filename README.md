@@ -10,13 +10,7 @@ This project has not been actively maintained. I plan to rebuild in 2024, so sta
 I've graduated university so this rebuild should improve many of the issues that have been reported.
 
 ## Usage
-The simplest way to generate a Javadoc for your project is to JDK that comes with Javadoc-Generator. You can preform this command
-by <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and then selecting "Javadoc Generator: Generate Javadoc".
-
-This generator will first attempt to use the Javadoc located in the JDK referenced in your JAVA_HOME.
-If it doesn't find a valid JAVA_HOME it will promt the user for a JDK install directory. If the user doesn't have a JDK installed they can use the JDK that comes packages with this extension by entering "Built In".
-
-The user will then be prompted for the source directory in which your java packages are located. If you have the java project open as the root directory of your workspace, you can leave the field blank and use the default java directory of ./src. 
+You will first need a JDG Config file. You can get one by clicking on your project folder and clicking "JDG: Initialize Config file". Adjust the config file until a valid command is generated with no errors. Once a valid javadoc command is created, click the button in the top right corner labled "JDG: Generate Javadoc". Once the Javadoc generation is complete, you should see the output appended to the config file. 
 
 ## Issues
 If you find issues, and you probably will, you can report them [here](https://github.com/KeeganBruer/javadoc-generator/issues).
