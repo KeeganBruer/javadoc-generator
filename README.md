@@ -10,7 +10,15 @@ This project has not been actively maintained. I plan to rebuild in 2024, so sta
 I've graduated university so this rebuild should improve many of the issues that have been reported.
 
 ## Usage
-You will first need a JDG Config file. You can get one by clicking on your project folder and clicking "JDG: Initialize Config file". Adjust the config file until a valid command is generated with no errors. Once a valid javadoc command is created, click the button in the top right corner labled "JDG: Generate Javadoc". Once the Javadoc generation is complete, you should see the output appended to the config file. 
+You will first need a JDG Config file. You can get one by clicking on your project folder and clicking "JDG: Initialize Config file". 
+
+<img src="./images/InitalizeConfig.png" alt="InitalizeConfig" style="width:200px;"/>
+
+Adjust the config file until a valid command is generated with no errors. Once a valid javadoc command is created, click the button in the top right corner labled "JDG: Generate Javadoc". 
+
+<img src="./images/RunGenerator.png" alt="InitalizeConfig" style="width:900px;"/>
+
+Once the Javadoc generation is complete, you should see the output appended to the config file. 
 
 ## Issues
 If you find issues, and you probably will, you can report them [here](https://github.com/KeeganBruer/javadoc-generator/issues).
