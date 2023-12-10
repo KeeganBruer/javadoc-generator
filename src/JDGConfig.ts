@@ -1,7 +1,7 @@
 import path = require("path");
 import * as fs from "fs"
 import * as vscode from 'vscode';
-import { JavaSettings } from "./JavaSettings";
+import { JavaSettings, execute } from "./JavaSettings";
 import { settings } from "cluster";
 import {ExtensionOutput} from "./extension"
 
@@ -25,8 +25,8 @@ export class JDGConfig {
         
         this.errors = []
         this.save_in_progress = false;
-        this.setProjectFolder(project_uri);
         this.JAVDOC = `${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}javadoc.exe`
+        this.setProjectFolder(project_uri);
     }
     setProjectFolder(project_folder:string) {
         this.project_folder = project_folder
@@ -37,6 +37,7 @@ export class JDGConfig {
     }
 
     async saveFile() {
+        ExtensionOutput.appendLine("Saving Config File: "+this.config_path)
         this.save_in_progress = true;
         if (this.config_path == undefined) return;
         fs.writeFileSync(this.config_path, this.toString(), 'utf8');
@@ -50,11 +51,22 @@ export class JDGConfig {
     clearErrors() {
         this.errors = []
     }
-    validate() {
-
+    async validate():Promise<boolean> {
+        ExtensionOutput.appendLine("Validating Config File")
+        if (!doesPathExist(this.project_folder)) {
+            this.errors.push("Project path does not exist")
+        }
+        if (!doesPathExist(this.JAVDOC)) {
+            this.errors.push("Cannot find the specified Javadoc.exe")
+        }
+        await this.saveFile()
+        return this.errors.length == 0;
     }
     static async load(settings:JavaSettings, config_path:string) {
-        if (!doesPathExist(config_path)) return;
+        if (!doesPathExist(config_path)) return  new JDGConfig(settings, "");
+        try {
+
+        } catch (e){}
         let content = fs.readFileSync(config_path, "utf-8")
         let config_string = content.split("==== CONFIGS ====")[1]
         config_string = config_string.split("====")[0];
@@ -73,10 +85,8 @@ export class JDGConfig {
             if (k == "JAVADOC OUT FOLDER") {CONFIG.dist_folder = v; continue;}
             if (k == "JAVDOC.exe") {CONFIG.JAVDOC = v; continue;}
         }
+        CONFIG.config_path = config_path;
         return CONFIG;
-        
-    }
-    watchFile() {
         
     }
     toString() {
@@ -90,7 +100,7 @@ JAVDOC.exe: ${this.JAVDOC ? this.JAVDOC : "UNDEFINED"}
 
 `
         )
-        str += (
+        if (this.errors.length == 0) str += (
 `==== COMMAND ====
 ${this.toJDocCommand(true)}
 
@@ -124,6 +134,18 @@ ${this.results.stdout}
         if (multiline == true)
             return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} \n\t${files.join("\n\t")}`
         return `${javadoc_executable} ${sourcepath} ${distpath} ${files.join(" ")}`
+    }
+    async runJavadoc() {
+        if (!await this.validate()) {
+            vscode.window.showErrorMessage(`JDG: Please fix errors with config file before running`)
+            return;
+        }
+        vscode.window.showInformationMessage(`Generating Javadoc`)
+        let results = await execute(this.toJDocCommand())
+		this.results = {
+            "stdout":results,
+		}
+        this.saveFile()
     }
 }
 

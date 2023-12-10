@@ -39,7 +39,7 @@
 				{
 					"command": "jdg.run",
 					"group": "navigation",
-					"when": "resourceScheme == file && resourceExtname == .jdgenerator"
+					"when": "resourceScheme == file && resourceFilename == config.jdgenerator"
 				}
 			],
 			"explorer/context": [{
