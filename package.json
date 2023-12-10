@@ -59,6 +59,8 @@
 		"lint": "eslint .",
 		"pretest": "npm run lint",
 		"package": "vsce package",
+		"publish": "vsce publish",
+		"vsmarket": "npm run package & npm run publish",
 		"test": "node ./test/runTest.js"
 	},
 	"devDependencies": {

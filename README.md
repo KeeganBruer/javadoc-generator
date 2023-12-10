@@ -20,6 +20,7 @@ The user will then be prompted for the source directory in which your java packa
 
 ## Issues
 If you find issues, and you probably will, you can report them [here](https://github.com/KeeganBruer/javadoc-generator/issues).
+Please include the config.jdgenerator file with your issue report.
 
 ## Release Notes
 ### 2.1.0
