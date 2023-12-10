@@ -1,6 +1,6 @@
 # javadoc Generator
-[![Version](https://vsmarketplacebadge.apphb.com/version/KeeganBruer.javadoc-generator.svg)](https://marketplace.visualstudio.com/items?itemName=KeeganBruer.javadoc-generator)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/KeeganBruer.javadoc-generator.svg)](https://marketplace.visualstudio.com/items?itemName=KeeganBruer.javadoc-generator)
+[![Version](https://vsmarketplacebadges.dev/version-short/KeeganBruer.javadoc-generator.png)](https://marketplace.visualstudio.com/items?itemName=KeeganBruer.javadoc-generator)
+[![Installs](https://vsmarketplacebadges.dev/installs-short/KeeganBruer.javadoc-generator.png)](https://marketplace.visualstudio.com/items?itemName=KeeganBruer.javadoc-generator)
 
 Javadoc Generator is an extension to VSCode that wraps the commandline javadoc compiler. To use just open
 any .java file and run the generator. The generator will then scan the rest of the project and generate a javadoc for the project.
