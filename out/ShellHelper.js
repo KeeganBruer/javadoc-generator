@@ -7,7 +7,7 @@ async function useShell(cb) {
     terminal.show();
     await cb(terminal);
     terminal.sendText("exit");
-    await waitForCompletion(terminal);
+    return await waitForCompletion(terminal);
 }
 exports.useShell = useShell;
 function waitForCompletion(terminal) {

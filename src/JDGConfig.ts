@@ -1,29 +1,39 @@
 import path = require("path");
 import * as fs from "fs"
 import * as vscode from 'vscode';
-import {getProjectFolder} from "./other"
+import { JavaSettings } from "./JavaSettings";
+import { settings } from "cluster";
+import {ExtensionOutput} from "./extension"
 
 export class JDGConfig {
     project_folder:string|undefined
     config_path:string|undefined
-    src_folder:string|undefined
     dist_folder:string|undefined
     JAVA_HOME:string|undefined
-    results:any
+    JAVDOC:string|undefined
+    file_seperator:string
+    results:{
+        stdout:string
+    } | undefined
     errors:any[]
     save_in_progress:boolean
-    constructor() {
+    settings:JavaSettings
+    constructor(settings:JavaSettings, project_uri:string) {
+        this.settings = settings;
+        this.file_seperator = this.settings.get("file.separator") || "\\"
+        this.JAVA_HOME = this.settings.get("java.home")
+        
         this.errors = []
         this.save_in_progress = false;
-        this.setProjectFolder(getProjectFolder());
+        this.setProjectFolder(project_uri);
+        this.JAVDOC = `${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}javadoc.exe`
     }
-    setProjectFolder(props:{project_folder:string|undefined, src_folder:string|undefined}) {
-        this.project_folder = props.project_folder
-        this.src_folder = props.src_folder
-        this.dist_folder = this.project_folder
+    setProjectFolder(project_folder:string) {
+        this.project_folder = project_folder
+        this.dist_folder = `${this.project_folder}${this.file_seperator}javadoc`
 
         if (this.project_folder == undefined) return;
-        this.config_path = path.join(this.project_folder, "./results.jdgenerator");
+        this.config_path = path.join(this.project_folder, "./config.jdgenerator");
     }
 
     async saveFile() {
@@ -43,13 +53,14 @@ export class JDGConfig {
     validate() {
 
     }
-    async load() {
-        vscode.window.showInformationMessage(`Loading Config: ${this.config_path}`)
-        if (!doesPathExist(this.config_path)) return;
-        let content = fs.readFileSync(this.config_path, "utf-8")
+    static async load(settings:JavaSettings, config_path:string) {
+        if (!doesPathExist(config_path)) return;
+        let content = fs.readFileSync(config_path, "utf-8")
         let config_string = content.split("==== CONFIGS ====")[1]
         config_string = config_string.split("====")[0];
         let lines = config_string.split("\n");
+        let CONFIG = new JDGConfig(settings, "");
+
         for (let i = 0; i < lines.length; i++) {
             let line = lines[i].trim();
             let config = line.split(":")
@@ -58,34 +69,23 @@ export class JDGConfig {
             if (
                 k == undefined || v == undefined
                 || k.trim() == "" || v.trim() == "") continue;
-            if (k == "PROJECT FOLDER") {this.project_folder = v; continue;}
-            if (k == "SOURCE FOLDER") {this.src_folder = v; continue;}
-            if (k == "JAVADOC OUT FOLDER") {this.dist_folder = v; continue;}
-            if (k == "JAVA_HOME") {this.JAVA_HOME = v; continue;}
+            if (k == "PROJECT FOLDER") {CONFIG.setProjectFolder(v); continue;}
+            if (k == "JAVADOC OUT FOLDER") {CONFIG.dist_folder = v; continue;}
+            if (k == "JAVDOC.exe") {CONFIG.JAVDOC = v; continue;}
         }
+        return CONFIG;
+        
     }
     watchFile() {
-        if (this.config_path == undefined) return;
-        const watcher = vscode.workspace.createFileSystemWatcher(this.config_path);
-        watcher.onDidChange((e) => {
-            vscode.window.showInformationMessage("Change to JDG Config")
-            if (this.save_in_progress == true) {
-                this.save_in_progress = false;
-                return;
-            }
-            this.clearErrors();
-            this.load();
-            this.saveFile()
-        });
+        
     }
     toString() {
         let str ="";
         str += (
 `==== CONFIGS ====
 PROJECT FOLDER: ${this.project_folder ? this.project_folder : "UNDEFINED"}
-SOURCE FOLDER: ${this.src_folder ? this.src_folder : "UNDEFINED"}
 JAVADOC OUT FOLDER: ${this.dist_folder ? this.dist_folder : "UNDEFINED"}
-JAVA_HOME: ${this.JAVA_HOME ? this.JAVA_HOME : "UNDEFINED"}
+JAVDOC.exe: ${this.JAVDOC ? this.JAVDOC : "UNDEFINED"}
 
 
 `
@@ -104,29 +104,78 @@ ${this.toJDocCommand(true)}
 
 `
         )
-        else if (this.results) str += (
-`==== RESULTS ====
-${JSON.stringify(this.results, null, 4)}
+        else if (this.results) { 
+            str += (
+`==== JAVADOC OUTPUT ====
+${this.results.stdout}
+
 `
-        )
+            )
+            
+        }
         return str;
     }
 
     toJDocCommand(multiline?:boolean) {
-        let javadoc_executable = `javadoc.exe`
-        let sourcepath = `-sourcepath "${this.src_folder}"`
+        let javadoc_executable = `"${this.JAVDOC}"` || `javadoc.exe`
+        let sourcepath = `-sourcepath "${this.project_folder}"`
         let distpath = `-d "${this.dist_folder}"`
+        let files = fromDir(this.project_folder, ".java").map(file=>`"${file}"`);
         if (multiline == true)
-            return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath}`
-        return `${javadoc_executable} ${sourcepath} ${distpath}`
+            return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} \n\t${files.join("\n\t")}`
+        return `${javadoc_executable} ${sourcepath} ${distpath} ${files.join(" ")}`
     }
 }
 
+function fromDir(startPath:string|undefined, filter:string):string[] {
+    ExtensionOutput.appendLine("searching: " + startPath + " for "+filter)
+    if (startPath == undefined || !doesPathExist(startPath)) {
+        ExtensionOutput.appendLine("folder doesn't exists " + startPath)
+        return [];
+    }
+    ExtensionOutput.appendLine("folder exists " + startPath)
+
+    var files = fs.readdirSync(startPath);
+    let found = [];
+    for (var i = 0; i < files.length; i++) {
+        var filename = path.join(startPath, files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()) {
+            found.push(...fromDir(filename, filter)); //recurse
+        } else if (filename.endsWith(filter)) {
+            found.push(filename)
+        };
+    };
+    return found;
+};
 
 export function doesPathExist(src_folder:string|undefined):src_folder is string {
     if (src_folder == undefined) return false;
-    let stats = fs.statSync(src_folder);
-    if (stats.isDirectory()) return true; 
-    if (stats.isFile()) return true; 
+    try {
+        let stats = fs.statSync(src_folder);
+        if (stats.isDirectory()) return true; 
+        if (stats.isFile()) return true; 
+    } catch (e){}
     return false;
+}
+
+export function getProjectFolder() {
+    let fPath = vscode.window.activeTextEditor?.document.uri.fsPath
+    if (fPath == undefined) fPath = vscode.workspace.workspaceFile?.fsPath;
+    if (fPath != undefined) fPath = path.join(fPath, "../")
+    if (fPath == undefined) fPath = vscode.window.activeTextEditor?.document.fileName;
+
+    if (fPath == undefined) return {project_folder:undefined, src_folder:undefined};
+    let src_folder:string|undefined = undefined;
+    if (fPath.includes("src")) {
+        fPath = fPath.split("src")[0]
+        src_folder = fPath+"src"
+    } else {
+        src_folder = path.join(fPath, "./src")
+        if (src_folder != undefined) {
+            let doesExist = doesPathExist(src_folder)
+            if (!doesExist) src_folder = undefined
+        }
+    }
+    return {project_folder:fPath, src_folder};
 }

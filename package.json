@@ -17,7 +17,7 @@
 		"commands": [
 			{
 				"command": "jdg.config",
-				"title": "JDG: Javadoc Build"
+				"title": "JDG: Initialize Config file"
 			},
 			{
 				"command": "jdg.run",
@@ -25,13 +25,28 @@
 			}
 		],
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "jdg.run",
+					"when": "false"
+				},
+				{
+					"command": "jdg.config",
+					"when": "false"
+				}
+			],
 			"editor/title": [
 				{
 					"command": "jdg.run",
 					"group": "navigation",
 					"when": "resourceScheme == file && resourceExtname == .jdgenerator"
 				}
-			]
+			],
+			"explorer/context": [{
+				"command": "jdg.config",
+				"when": "explorerResourceIsFolder",
+				"group": "jdg"
+			}]
 		}
 	},
 	"scripts": {
