@@ -27,6 +27,11 @@ Please include the config.jdgenerator file with your issue report.
 
 ## Release Notes
 
+### 3.0.2
+- switches to JSON for more complex configuration
+- adds exclude array as requested by issue #28
+- Readme updates
+
 ### 3.0.0
 - Complete rebuild
 - Adds config.jdgenerator for better transparency
