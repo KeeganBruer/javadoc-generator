@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { JavaSettings, execute } from "./JavaSettings";
 import { settings } from "cluster";
 import {ExtensionOutput} from "./extension";
+import { ExecFileException } from "child_process";
 
 export class JDGConfig {
 	project_folder:string|undefined;
@@ -11,6 +12,8 @@ export class JDGConfig {
 	dist_folder:string|undefined;
 	JAVA_HOME:string|undefined;
 	JAVDOC:string|undefined;
+	excluded_folders:string[]
+
 	file_seperator:string;
 	results:{
         stdout:string
@@ -22,7 +25,7 @@ export class JDGConfig {
 		this.settings = settings;
 		this.file_seperator = this.settings.get("file.separator") || "\\";
 		this.JAVA_HOME = this.settings.get("java.home");
-        
+        this.excluded_folders = [];
 		this.errors = [];
 		this.save_in_progress = false;
 		this.JAVDOC = `${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}javadoc.exe`;
@@ -40,7 +43,15 @@ export class JDGConfig {
 		ExtensionOutput.appendLine("Saving Config File: "+this.config_path);
 		this.save_in_progress = true;
 		if (this.config_path == undefined) return;
-		fs.writeFileSync(this.config_path, this.toString(), "utf8");
+		ExtensionOutput.appendLine("Written Config File");
+		try {
+
+			fs.writeFileSync(this.config_path, this.toString(), "utf8");
+		} catch (e) {
+			ExtensionOutput.appendLine(JSON.stringify(e));
+
+		}
+		ExtensionOutput.appendLine("Written Config File");
 	}
 	async showToUser() {
 		if (this.config_path == undefined) return;
@@ -56,9 +67,14 @@ export class JDGConfig {
 		if (!doesPathExist(this.project_folder)) {
 			this.errors.push("Project path does not exist");
 		}
+		let splitJavadoc = this.JAVDOC?.split(this.file_seperator) ?? [];
 		if (!doesPathExist(this.JAVDOC)) {
 			this.errors.push("Cannot find the specified Javadoc.exe");
 		}
+		else if (splitJavadoc[splitJavadoc.length-1].toLowerCase().trim() != "javadoc.exe") {
+			this.errors.push("The javadoc executable path should end in \"Javadoc.exe\"");
+		}
+		ExtensionOutput.appendLine(` errors ${this.errors.length}`);
 		await this.saveFile();
 		return this.errors.length == 0;
 	}
@@ -67,36 +83,28 @@ export class JDGConfig {
 		try {
 
 		} catch (e){}
+		let parent_path = path.resolve(config_path, "./");
 		const content = fs.readFileSync(config_path, "utf-8");
 		let config_string = content.split("==== CONFIGS ====")[1];
 		config_string = config_string.split("====")[0];
-		const lines = config_string.split("\n");
-		const CONFIG = new JDGConfig(settings, "");
-
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i].trim();
-			const config = line.split(":");
-			const k = config[0];
-			const v = config.slice(1).join(":").trim();
-			if (
-				k == undefined || v == undefined
-                || k.trim() == "" || v.trim() == "") continue;
-			if (k == "PROJECT FOLDER") {CONFIG.setProjectFolder(v); continue;}
-			if (k == "JAVADOC OUT FOLDER") {CONFIG.dist_folder = v; continue;}
-			if (k == "JAVDOC.exe") {CONFIG.JAVDOC = v; continue;}
-		}
+		let configs = JSON.parse(config_string.trim())
+        let CONFIG = new JDGConfig(settings, configs.base_path)
+		CONFIG.dist_folder = configs.out
+		CONFIG.JAVDOC = configs.javadoc_executable
+		CONFIG.excluded_folders = configs.exclude
 		CONFIG.config_path = config_path;
 		return CONFIG;
-        
 	}
 	toString() {
 		let str ="";
 		str += (
-			`==== CONFIGS ====
-PROJECT FOLDER: ${this.project_folder ? this.project_folder : "UNDEFINED"}
-JAVADOC OUT FOLDER: ${this.dist_folder ? this.dist_folder : "UNDEFINED"}
-JAVDOC.exe: ${this.JAVDOC ? this.JAVDOC : "UNDEFINED"}
-
+			`==== CONFIGS ====		
+${JSON.stringify({
+	"base_path":this.project_folder ? this.project_folder : "UNDEFINED",
+	"out":this.dist_folder,
+	"javadoc_executable":this.JAVDOC,
+	"exclude":this.excluded_folders
+}, null, 4)}
 
 `
 		);
@@ -131,9 +139,15 @@ ${this.results.stdout}
 		const sourcepath = `-sourcepath "${this.project_folder}"`;
 		const distpath = `-d "${this.dist_folder}"`;
 		const files = fromDir(this.project_folder, ".java").map(file=>`"${file}"`);
+		const filteredFiles = files.filter(file=>{
+			for (let i = 0; i < this.excluded_folders.length; i++) {
+				if (file.includes(this.excluded_folders[i])) return false;
+			}
+			return true;
+		})
 		if (multiline == true)
-			return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} \n\t${files.join("\n\t")}`;
-		return `${javadoc_executable} ${sourcepath} ${distpath} ${files.join(" ")}`;
+			return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} \n\t${filteredFiles.join("\n\t")}`;
+		return `${javadoc_executable} ${sourcepath} ${distpath} ${filteredFiles.join(" ")}`;
 	}
 	async runJavadoc() {
 		if (!await this.validate()) {

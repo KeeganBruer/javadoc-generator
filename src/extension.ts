@@ -50,6 +50,8 @@ export async function activate({ subscriptions, extension }: vscode.ExtensionCon
 		const _CONFIG = await JDGConfig.load(settings, document.fileName);
 		if (_CONFIG == undefined) return;
 		const CONFIG = _CONFIG;
+		ExtensionOutput.appendLine(CONFIG.toString());
+
 		await CONFIG.validate();
 	});	
 }
