@@ -9,9 +9,15 @@ You will first need a JDG Config file. You can get one by clicking on your proje
 
 <img src="./images/InitalizeConfig.png" alt="InitalizeConfig" style="width:200px;"/>
 
-Adjust the config file until a valid command is generated with no errors. Once a valid javadoc command is created, click the button in the top right corner labled "JDG: Generate Javadoc". 
+Adjust the config file until a valid command is generated with no errors. 
 
 <img src="./images/RunGenerator.png" alt="InitalizeConfig" style="width:900px;"/>
+
+You can exclude folders in the specified base_path by adding to the exclude array. This array matches strings directly, using the string prototype's includes() method.
+
+<img src="./images/ExcludeFolders.png" alt="InitalizeConfig" style="width:900px;"/>
+
+Once a valid javadoc command is created, click the button in the top right corner labled "JDG: Generate Javadoc". 
 
 Once the Javadoc generation is complete, you should see the output appended to the config file. 
 
