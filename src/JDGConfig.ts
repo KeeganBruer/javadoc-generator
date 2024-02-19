@@ -71,7 +71,7 @@ export class JDGConfig {
 		if (!doesPathExist(this.JAVDOC)) {
 			this.errors.push("Cannot find the specified Javadoc.exe");
 		}
-		else if (splitJavadoc[splitJavadoc.length-1].toLowerCase().trim().includes("javadoc")) {
+		else if (!splitJavadoc[splitJavadoc.length-1].toLowerCase().trim().includes("javadoc")) {
 			this.errors.push("The javadoc executable path should end in with the executable file name and extension.");
 		}
 		ExtensionOutput.appendLine(` errors ${this.errors.length}`);
