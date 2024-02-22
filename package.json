@@ -3,7 +3,7 @@
 	"displayName": "Javadoc-Generator",
 	"description": "A unofficial VSCode wrapper to the official javadoc executable.",
 	"publisher": "KeeganBruer",
-	"version": "3.0.5",
+	"version": "3.0.6",
 	"icon": "JavaGeneratorLogo.PNG",
 	"engines": {
 		"vscode": "^1.62.0"

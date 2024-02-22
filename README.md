@@ -36,8 +36,9 @@ Please include the config.jdgenerator file with your issue report.
 
 ## Release Notes
 
-### 3.0.5
+### 3.0.5 - 3.0.6
 - "raw_params" config added from issue #31
+- Readme updates with config descriptions
 
 ### 3.0.2 - 3.0.4
 - switches to JSON for more complex configuration

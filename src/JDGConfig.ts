@@ -157,6 +157,7 @@ ${this.results.stdout}
 		let rawParams = ""
 		if (checkEmptyRawParams())
 			rawParams = this.raw_params
+		
 		if (multiline == true) {
 			if (checkEmptyRawParams()) rawParams = "\n\t"+rawParams
 			return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} ${rawParams}\n\t${filteredFiles.join("\n\t")}`;
