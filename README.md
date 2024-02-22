@@ -28,6 +28,10 @@ Please include the config.jdgenerator file with your issue report.
 ## Release Notes
 
 ### 3.0.2
+- "raw_params" config added from issue #31
+- Readme updates
+
+### 3.0.2
 - switches to JSON for more complex configuration
 - adds exclude array as requested by issue #28
 - Readme updates

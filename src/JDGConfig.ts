@@ -13,6 +13,7 @@ export class JDGConfig {
 	JAVA_HOME:string|undefined;
 	JAVDOC:string|undefined;
 	excluded_folders:string[]
+	raw_params:string
 
 	file_seperator:string;
 	results:{
@@ -27,6 +28,7 @@ export class JDGConfig {
 		this.JAVA_HOME = this.settings.get("java.home");
         this.excluded_folders = [];
 		this.errors = [];
+		this.raw_params = ""
 		this.save_in_progress = false;
 		this.JAVDOC = `${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}javadoc.exe`;
 		this.setProjectFolder(project_uri);
@@ -93,6 +95,7 @@ export class JDGConfig {
 		CONFIG.JAVDOC = configs.javadoc_executable
 		CONFIG.excluded_folders = configs.exclude
 		CONFIG.config_path = config_path;
+		CONFIG.raw_params = configs.raw_params;
 		return CONFIG;
 	}
 	toString() {
@@ -103,7 +106,8 @@ ${JSON.stringify({
 	"base_path":this.project_folder ? this.project_folder : "UNDEFINED",
 	"out":this.dist_folder,
 	"javadoc_executable":this.JAVDOC,
-	"exclude":this.excluded_folders
+	"exclude":this.excluded_folders,
+	"raw_params":this.raw_params
 }, null, 4)}
 
 `
@@ -145,9 +149,14 @@ ${this.results.stdout}
 			}
 			return true;
 		})
-		if (multiline == true)
-			return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} \n\t${filteredFiles.join("\n\t")}`;
-		return `${javadoc_executable} ${sourcepath} ${distpath} ${filteredFiles.join(" ")}`;
+		let rawParams = ""
+		if (this.raw_params != undefined)
+			rawParams = this.raw_params
+		if (multiline == true) {
+			if (this.raw_params != undefined) rawParams = "\n\t"+rawParams
+			return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} ${rawParams}\n\t${filteredFiles.join("\n\t")}`;
+		}
+		return `${javadoc_executable} ${sourcepath} ${distpath} ${rawParams}${filteredFiles.join(" ")}`;
 	}
 	async runJavadoc() {
 		if (!await this.validate()) {
