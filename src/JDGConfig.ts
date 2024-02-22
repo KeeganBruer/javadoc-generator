@@ -149,11 +149,16 @@ ${this.results.stdout}
 			}
 			return true;
 		})
+		const checkEmptyRawParams = ()=>{
+			if (this.raw_params == undefined) return false
+			if (this.raw_params.trim() == "") return false
+			return true;
+		}
 		let rawParams = ""
-		if (this.raw_params != undefined)
+		if (checkEmptyRawParams())
 			rawParams = this.raw_params
 		if (multiline == true) {
-			if (this.raw_params != undefined) rawParams = "\n\t"+rawParams
+			if (checkEmptyRawParams()) rawParams = "\n\t"+rawParams
 			return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} ${rawParams}\n\t${filteredFiles.join("\n\t")}`;
 		}
 		return `${javadoc_executable} ${sourcepath} ${distpath} ${rawParams}${filteredFiles.join(" ")}`;

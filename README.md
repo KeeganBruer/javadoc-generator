@@ -21,6 +21,15 @@ Once a valid javadoc command is created, click the button in the top right corne
 
 Once the Javadoc generation is complete, you should see the output appended to the config file. 
 
+### All Configuration Options
+| Config | Type | Description|
+| - | - | - |  
+| base_path | String | Directory that will be searched for .java files | 
+| out | String | Directory to store the resulting javadoc | 
+| javadoc_executable | String | The location of the javadoc executable on your system (default based on JAVA_HOME env var) |
+| exclude | String[] | An array of strings that each file is tested against using the .include() string method. |  
+| raw_params | | Adds the string directly to the generated javadoc command. |  
+
 ## Issues
 If you find issues, and you probably will, you can report them [here](https://github.com/KeeganBruer/javadoc-generator/issues).
 Please include the config.jdgenerator file with your issue report.
