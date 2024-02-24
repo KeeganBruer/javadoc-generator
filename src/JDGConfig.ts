@@ -31,6 +31,13 @@ export class JDGConfig {
 		this.raw_params = ""
 		this.save_in_progress = false;
 		this.JAVDOC = `${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}javadoc.exe`;
+		if (!doesPathExist(this.JAVDOC)) {
+			this.JAVDOC = `${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}javadoc`;
+			if (!doesPathExist(this.JAVDOC)) {
+				this.errors.push("Could not find a valid javadoc executable located in: "+`\n\t${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}`);
+				this.JAVDOC = `${this.JAVA_HOME}${this.file_seperator}bin${this.file_seperator}`;
+			}
+		}
 		this.setProjectFolder(project_uri);
 	}
 	setProjectFolder(project_folder:string) {
@@ -71,7 +78,7 @@ export class JDGConfig {
 		}
 		let splitJavadoc = this.JAVDOC?.split(this.file_seperator) ?? [];
 		if (!doesPathExist(this.JAVDOC)) {
-			this.errors.push("Cannot find the specified Javadoc.exe");
+			this.errors.push("Cannot find the specified Javadoc executable");
 		}
 		else if (!splitJavadoc[splitJavadoc.length-1].toLowerCase().trim().includes("javadoc")) {
 			this.errors.push("The javadoc executable path should end in with the executable file name and extension.");
@@ -139,7 +146,7 @@ ${this.results.stdout}
 	}
 
 	toJDocCommand(multiline?:boolean) {
-		const javadoc_executable = `"${this.JAVDOC}"` || "javadoc.exe";
+		const javadoc_executable = `"${this.JAVDOC}"`;
 		const sourcepath = `-sourcepath "${this.project_folder}"`;
 		const distpath = `-d "${this.dist_folder}"`;
 		const files = fromDir(this.project_folder, ".java").map(file=>`"${file}"`);
@@ -157,7 +164,7 @@ ${this.results.stdout}
 		let rawParams = ""
 		if (checkEmptyRawParams())
 			rawParams = this.raw_params
-		
+
 		if (multiline == true) {
 			if (checkEmptyRawParams()) rawParams = "\n\t"+rawParams
 			return `${javadoc_executable} \n\t${sourcepath} \n\t${distpath} ${rawParams}\n\t${filteredFiles.join("\n\t")}`;
